@@ -1,0 +1,54 @@
+name: Real v2 core-term-rsudo package integration
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-pkg-and-context:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: massimilianonardi-ai/m-os
+          ref: 1e3a038a5abf6f8c176272d8e44464c842d3cefd
+          path: m-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: massimilianonardi-ai/pkg-catalog
+          ref: 9d889cc265c29eeae456b8fe1ad638654c36e8c7
+          path: catalog
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: massimilianonardi-ai/rumiai-tests
+          ref: a8db8cf5f681933d333e68f83e2d6220b62b32ea
+          path: tests
+          persist-credentials: false
+      - name: Prepare real m host and local catalog
+        shell: sh
+        run: |
+          set -eu
+          cd m-source
+          ./m osarch update
+          conf=$(./m state-path system sys pkg conf)
+          mkdir -p -- "$conf"
+          printf '%s\n' "$GITHUB_WORKSPACE/catalog" > "$conf/catalog"
+      - name: Install real GitHub releases and run real context consumers
+        shell: sh
+        env:
+          RUMIAI_TEST_M_OS_ROOT: ${{ github.workspace }}/m-source
+          RUMIAI_TEST_PKG_CATALOG_ROOT: ${{ github.workspace }}/catalog
+        run: |
+          set -eu
+          ./tests/rumiai-test --list m-os/pkg-real-source-composition
+          ./tests/rumiai-test m-os/pkg-real-source-composition
