@@ -24,4 +24,4 @@ an interactive terminal, remote privileged SSH, or stable physical-host PASS.
 Current main-source `loadlib_inject_stream` also accepts explicit
 `--library reference local-source` inputs for selected package-owned shell
 libraries, without changing bare system-library reference behavior. This
-source change is not present in immutable `v0.1.0` and has not been released.
+source change is not present in immutable `v0.1.0` and is available in the immutable v0.1.1 release; its installed consumer validation is tracked by R1.
