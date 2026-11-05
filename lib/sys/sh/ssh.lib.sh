@@ -1,5 +1,5 @@
-loadsyslib "rand"
-loadsyslib "ipc"
+. rand.lib.sh || return 1
+. ipc.lib.sh || return 1
 
 #------------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ ssh_auth()
 
   unset _ssh_auth_secret
 
-  SSH_ASKPASS="$m_BIN_SYS_DIR/ssh-askpass" \
+  SSH_ASKPASS="$(command -v ssh-askpass)" \
   SSH_ASKPASS_REQUIRE="force" \
   m_SSH_ASKPASS_FIFO="$_ssh_auth_fifo" \
   ssh \
@@ -176,7 +176,7 @@ ssh_password()
   ipc_once_set _ssh_askpass_id "$_ssh_password" || exit 1
   unset _ssh_password
 
-  SSH_ASKPASS="$m_BIN_SYS_DIR/ssh-askpass" \
+  SSH_ASKPASS="$(command -v ssh-askpass)" \
   SSH_ASKPASS_REQUIRE="force" \
   m_SSH_ASKPASS_ID="$_ssh_askpass_id" \
   ssh \
