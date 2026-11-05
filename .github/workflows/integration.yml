@@ -51,4 +51,15 @@ jobs:
         run: |
           set -eu
           ./tests/rumiai-test --list m-os/pkg-real-source-composition
-          ./tests/rumiai-test m-os/pkg-real-source-composition
+          if ./tests/rumiai-test m-os/pkg-real-source-composition; then
+            :
+          else
+            status=$?
+            for log in ./tests/.runs/*/logs/m-os/pkg-real-source-composition/*.log
+            do
+              [ -f "$log" ] || continue
+              printf '%s\n' "--- real test log: $log ---"
+              cat "$log"
+            done
+            exit "$status"
+          fi
