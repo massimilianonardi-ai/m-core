@@ -17,5 +17,6 @@ surface, e.g. `. array.lib.sh`. Do not duplicate these libraries into
 `m-os/lib/sys/sh` or redefine `loadsyslib`.
 
 The real composed `m-core`/`m-term`/`m-rsudo` install and library/command
-smoke has passed on a GitHub-hosted Ubuntu runner. This does **not** establish
+smoke passed on both GitHub-hosted Ubuntu and macOS in workflow
+`massimilianonardi-ai/m-core` run `42037725004`. This does **not** establish
 an interactive terminal, remote privileged SSH, or stable physical-host PASS.
