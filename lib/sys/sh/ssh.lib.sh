@@ -124,7 +124,10 @@ ssh_auth()
 
   unset _ssh_auth_secret
 
-  SSH_ASKPASS="$(command -v ssh-askpass)" \
+  _ssh_askpass_bin=$(command -v ssh-askpass) || exit 1
+  [ -n "$_ssh_askpass_bin" ] || exit 1
+
+  SSH_ASKPASS="$_ssh_askpass_bin" \
   SSH_ASKPASS_REQUIRE="force" \
   m_SSH_ASKPASS_FIFO="$_ssh_auth_fifo" \
   ssh \
@@ -176,7 +179,10 @@ ssh_password()
   ipc_once_set _ssh_askpass_id "$_ssh_password" || exit 1
   unset _ssh_password
 
-  SSH_ASKPASS="$(command -v ssh-askpass)" \
+  _ssh_askpass_bin=$(command -v ssh-askpass) || exit 1
+  [ -n "$_ssh_askpass_bin" ] || exit 1
+
+  SSH_ASKPASS="$_ssh_askpass_bin" \
   SSH_ASKPASS_REQUIRE="force" \
   m_SSH_ASKPASS_ID="$_ssh_askpass_id" \
   ssh \
