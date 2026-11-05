@@ -1,5 +1,21 @@
 # m-core
 
-Source repository for shared technical `m` commands and libraries required by the extracted terminal/menu and `rsudo` capabilities but not already part of the autonomous `m-os` baseline: generic container/encoding/random/IPC/SSH and injection libraries plus the required credential-input helpers. Current source files and operational manuals are imported intact.
+Independent, real source package of shared technical shell libraries used by
+`m-term` and `m-rsudo`, with the package-local `readpass` and `ssh-askpass`
+commands. The `m-os` bootstrap, `core.lib.sh`, state and `pkg` remain in
+`m-os` and are not copied here.
 
-The authoritative `m` bootstrap, shell core, `pkg`, state and resource runtime remain in `m-os` rather than being duplicated here. A future real `pkg` v2 composition must resolve shell-library loading against installed package views and verify real consumers; copying the source layout is not evidence of that working.
+`v0.1.0` is a published, checksum-protected GitHub release built by
+`sh build.sh release`. Its archive contains `bin/`, `lib/sh/` and
+`res/manual/` from actual owned sources. `pkg-catalog/pkg-schema-v2` owns the
+corresponding `m-core` definition and `link/lib/sh` projections.
+
+The libraries are **package-local**. After installing their exact concrete
+through the public `m pkg` command, a shell must select it through
+`context pkg=m-core@v0.1.0` before using the public POSIX dot-source
+surface, e.g. `. array.lib.sh`. Do not duplicate these libraries into
+`m-os/lib/sys/sh` or redefine `loadsyslib`.
+
+The real composed `m-core`/`m-term`/`m-rsudo` install and library/command
+smoke has passed on a GitHub-hosted Ubuntu runner. This does **not** establish
+an interactive terminal, remote privileged SSH, or stable physical-host PASS.
