@@ -20,3 +20,8 @@ The real composed `m-core`/`m-term`/`m-rsudo` install and library/command
 smoke passed on both GitHub-hosted Ubuntu and macOS in workflow
 `massimilianonardi-ai/m-core` run `42037725004`. This does **not** establish
 an interactive terminal, remote privileged SSH, or stable physical-host PASS.
+
+Current main-source `loadlib_inject_stream` also accepts explicit
+`--library reference local-source` inputs for selected package-owned shell
+libraries, without changing bare system-library reference behavior. This
+source change is not present in immutable `v0.1.0` and has not been released.

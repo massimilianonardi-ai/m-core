@@ -2,7 +2,8 @@
 #
 # Public function:
 #   loadlib_inject_stream
-#     [LIBRARY_REFERENCE | --command COMMAND_NAME LOCAL_SOURCE]...
+#     [LIBRARY_REFERENCE | --library LIBRARY_REFERENCE LOCAL_SOURCE |
+#      --command COMMAND_NAME LOCAL_SOURCE]...
 #     [-- COMMAND_SOURCE [COMMAND_ARG...]]
 #
 # The caller supplies the complete embedded library set and named command-source
@@ -13,6 +14,7 @@
 loadlib_inject_stream()
 (
   _loadlib_inject_stream_refs=
+  _loadlib_inject_stream_paths=
   _loadlib_inject_stream_count=0
   _loadlib_inject_stream_commands=
   _loadlib_inject_stream_command_names=
@@ -72,23 +74,36 @@ loadlib_inject_stream()
       continue
     fi
 
-    [ -n "$1" ] || return 1
+    if [ "$1" = "--library" ]
+    then
+      shift
+      [ "$#" -ge 2 ] || return 1
+      _loadlib_inject_stream_ref=$1
+      _loadlib_inject_stream_path=$2
+      shift 2
+    else
+      _loadlib_inject_stream_ref=$1
+      _loadlib_inject_stream_path="$m_LIB_DIR/sys/sh/${1}.lib.sh"
+      shift
+    fi
 
-    _loadlib_inject_stream_path="$m_LIB_DIR/sys/sh/${1}.lib.sh"
+    [ -n "$_loadlib_inject_stream_ref" ] || return 1
     [ -f "$_loadlib_inject_stream_path" ] &&
       [ -r "$_loadlib_inject_stream_path" ] ||
       return 2
 
-    _loadlib_inject_stream_quoted_ref="$(quote "$1")" || return 3
+    _loadlib_inject_stream_quoted_ref="$(quote "$_loadlib_inject_stream_ref")" || return 3
+    _loadlib_inject_stream_quoted_path="$(quote "$_loadlib_inject_stream_path")" || return 3
     if [ -n "$_loadlib_inject_stream_refs" ]
     then
       _loadlib_inject_stream_refs="$_loadlib_inject_stream_refs $_loadlib_inject_stream_quoted_ref"
+      _loadlib_inject_stream_paths="$_loadlib_inject_stream_paths $_loadlib_inject_stream_quoted_path"
     else
       _loadlib_inject_stream_refs=$_loadlib_inject_stream_quoted_ref
+      _loadlib_inject_stream_paths=$_loadlib_inject_stream_quoted_path
     fi
 
     _loadlib_inject_stream_count=$((_loadlib_inject_stream_count + 1))
-    shift
   done
 
   if [ "$#" -gt 0 ]
@@ -108,13 +123,12 @@ loadlib_inject_stream()
     _loadlib_inject_stream_has_command=1
   fi
 
-  eval "set -- $_loadlib_inject_stream_refs"
+  eval "set -- $_loadlib_inject_stream_paths"
 
   _loadlib_inject_stream_index=0
-  for _loadlib_inject_stream_ref
+  for _loadlib_inject_stream_path
   do
     _loadlib_inject_stream_index=$((_loadlib_inject_stream_index + 1))
-    _loadlib_inject_stream_path="$m_LIB_DIR/sys/sh/${_loadlib_inject_stream_ref}.lib.sh"
 
     printf '\n_loadlib_inject_stream_library_%s()\n{\n' "$_loadlib_inject_stream_index" || exit 3
     cat "$_loadlib_inject_stream_path" || exit 3
@@ -125,6 +139,7 @@ loadlib_inject_stream()
   printf '  [ "$#" -eq 1 ] || return 1\n' || exit 3
   printf '  case "$1" in\n' || exit 3
 
+  eval "set -- $_loadlib_inject_stream_refs"
   _loadlib_inject_stream_index=0
   for _loadlib_inject_stream_ref
   do

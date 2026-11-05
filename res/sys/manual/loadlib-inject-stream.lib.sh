@@ -5,7 +5,8 @@ SYNOPSIS
     loadsyslib "loadlib-inject-stream"
 
     loadlib_inject_stream
-        [library-reference | --command command-name local-source]...
+        [library-reference | --library library-reference local-source |
+         --command command-name local-source]...
         [-- command-source [command-arg...]]
 
 DESCRIPTION
@@ -16,9 +17,11 @@ DESCRIPTION
     and zero or more named command-source files. The generator performs no
     dependency discovery or automatic transitive closure.
 
-    A library-reference is relative to lib/sys/sh and omits .lib.sh. Each
-    selected library is embedded, exposed through the generated in-memory
-    loadlib implementation and loaded in caller-supplied order.
+    A bare library-reference is relative to lib/sys/sh and omits .lib.sh.
+    --library library-reference local-source instead selects one explicitly
+    chosen readable local file, including a package-owned library view.
+    Both forms embed its source bytes, expose a virtual sys/sh/<reference>
+    through in-memory loadlib, and load it in caller order.
 
     --command is repeatable. It associates one explicit POSIX shell function
     identifier with one readable local source file. The generated function has
@@ -45,7 +48,8 @@ DESCRIPTION
 
 FUNCTIONS
     loadlib_inject_stream
-        [library-reference | --command command-name local-source]...
+        [library-reference | --library library-reference local-source |
+         --command command-name local-source]...
         [-- command-source [command-arg...]]
 
         Write the generated shell program to standard output.
@@ -53,6 +57,11 @@ FUNCTIONS
         library-reference
             Select one system shell library to embed and load. References and
             --command options may be interleaved before the final -- separator.
+
+        --library library-reference local-source
+            Embed a caller-selected readable library source using the named
+            in-memory reference. No remote file is created or consulted.
+            Local source may reside in the selected concrete package view.
 
         --command command-name local-source
             Define a reusable generated command function.
@@ -126,7 +135,9 @@ RETURN STATUS
 CALLER OBLIGATIONS
     The caller must explicitly embed every library that may be loaded while the
     generated program runs, including transitive dependencies and
-    runtime-selected candidates.
+    runtime-selected candidates. A library that imports other libraries using
+    POSIX dot-source must be made source-injection-compatible by its owner;
+    no remote source files are materialized.
 
     Selected libraries are loaded in caller-supplied order. The caller owns
     ordering, repeated-sourcing and non-reserved namespace-collision
